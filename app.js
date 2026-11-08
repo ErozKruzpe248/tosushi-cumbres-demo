@@ -42,6 +42,13 @@ let cart = loadCart();
 let draft = null;
 let returnTo = null;
 let toastTimer;
+const menuPhotoObserver = 'IntersectionObserver' in window ? new IntersectionObserver((entries, observer) => {
+  for (const { isIntersecting, target } of entries) {
+    if (!isIntersecting || !target.isConnected) continue;
+    target.src = target.dataset.src;
+    observer.unobserve(target);
+  }
+}, { rootMargin: '240px 0px' }) : null;
 
 function loadCart() {
   try {
@@ -69,15 +76,20 @@ function renderMenu() {
     && normalize([item.name, item.description, item.category, ...(item.options?.map(option => option.label) ?? [])].join(' ')).includes(term));
   byId('result-count').textContent = `${matches.length} ${matches.length === 1 ? 'platillo' : 'platillos'}`;
   for (const button of filters.querySelectorAll('button')) button.setAttribute('aria-pressed', String(button.dataset.category === activeCategory));
+  menuPhotoObserver?.disconnect();
+  const photoSource = menuPhotoObserver ? 'data-src' : 'src';
   grid.innerHTML = matches.map(item => {
     const prices = item.options?.map(option => option.price) ?? [item.price];
     const price = Math.min(...prices);
     return `<article class="menu-card${item.featured ? ' featured' : ''}">
-      <div class="menu-main"><div class="menu-photo" data-photo="${item.id}"><img src="./assets/${item.photo ?? item.id}.webp" alt="${escapeHtml(item.photoAlt)}" loading="lazy" decoding="async">${item.illustrative ? '<span>Foto ilustrativa</span>' : ''}</div>
+      <div class="menu-main"><div class="menu-photo" data-photo="${item.id}"><img ${photoSource}="./assets/${item.photo ?? item.id}.webp" alt="${escapeHtml(item.photoAlt)}" loading="lazy" decoding="async">${item.illustrative ? '<span>Foto ilustrativa</span>' : ''}</div>
       <div><p class="card-label">${item.featured ? '✦ En portada' : item.category}</p><h3>${item.name}</h3><p class="card-description">${item.description}</p></div></div>
       <div class="card-bottom"><p class="card-price">${prices.some(value => value > price) ? '<small>Desde</small> ' : ''}${mxn(price)}</p>
       <button type="button" class="button card-action" data-product="${item.id}" aria-label="Elegir ${item.name}">Elegir <span aria-hidden="true">+</span></button></div></article>`;
   }).join('') || '<div class="empty-results"><p>No encontramos platillos con esa búsqueda.</p><button class="button outline" type="button" data-reset-search>Ver todo el menú</button></div>';
+  if (menuPhotoObserver) {
+    for (const photo of grid.querySelectorAll('img[data-src]')) menuPhotoObserver.observe(photo);
+  }
 }
 
 function renderProduct() {

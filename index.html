@@ -3,16 +3,24 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="robots" content="noindex, nofollow">
+  <meta name="robots" content="noindex">
   <meta name="theme-color" content="#191c15">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; base-uri 'none'; form-action 'none'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; frame-src https://www.google.com https://maps.google.com; base-uri 'none'; form-action 'none'">
   <link rel="icon" href="data:,">
-  <meta name="description" content="Demo de sitio y carta digital para To Sushi Cumbres. Pedido simulado.">
-  <title>To Sushi Cumbres · Demo de concepto</title>
+  <meta name="description" content="Demo de To Sushi en Monterrey. Explora el menú de muestra, la promoción del miércoles y las ubicaciones de Cumbres, Valle y Puerta de Hierro.">
+  <link rel="canonical" href="https://erozkruzpe248.github.io/tosushi-cumbres-demo/">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="es_MX">
+  <meta property="og:title" content="To Sushi Cumbres · Menú y sucursales">
+  <meta property="og:description" content="Demo de menú de sushi, promoción del miércoles y tres ubicaciones en Monterrey.">
+  <meta property="og:url" content="https://erozkruzpe248.github.io/tosushi-cumbres-demo/">
+  <meta property="og:image" content="https://erozkruzpe248.github.io/tosushi-cumbres-demo/assets/rollo-avocado.webp">
+  <meta property="og:image:alt" content="Rollo de sushi cubierto de aguacate">
+  <title>To Sushi Cumbres | Menú, promoción y sucursales (demo)</title>
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <a class="skip" href="#carta">Saltar a la carta</a>
+  <a class="skip" href="#menu">Saltar al menú</a>
   <header class="header">
     <div class="wrap header-inner">
       <a class="brand" href="#inicio" aria-label="To Sushi Cumbres Monterrey, N.L. · Inicio">
@@ -20,7 +28,7 @@
         <span class="brand-branch">Cumbres<span>Monterrey, N.L.</span></span>
       </a>
       <nav class="site-nav" aria-label="Navegación principal">
-        <a href="#destacados">Destacados</a><a href="#carta">Carta</a><a href="#ubicacion">Ubicación</a>
+        <a href="#destacados">Destacados</a><a href="#menu">Menú</a><a href="#ubicacion">Ubicación</a>
       </nav>
       <div class="header-actions">
         <span class="demo-label"><span></span> Demo</span>
@@ -39,7 +47,7 @@
           <p class="eyebrow"><span></span> Cocina japonesa en Cumbres</p>
           <h1 id="hero-title">El arte<br>del <em>rollo.</em></h1>
           <p class="hero-description">De un rollo de aguacate a un gohan caliente. Elige tus favoritos y arma tu pedido.</p>
-          <a class="button primary" href="#carta">Explorar la carta <span aria-hidden="true">↘</span></a>
+          <a class="button primary" href="#menu">Explorar el menú <span aria-hidden="true">↘</span></a>
         </div>
         <figure class="hero-visual">
           <div class="hero-orbit" aria-hidden="true"></div>
@@ -47,6 +55,9 @@
           <span class="spark spark-one" aria-hidden="true">✦</span>
           <span class="spark spark-two" aria-hidden="true">✧</span>
           <img class="hero-food" src="./assets/rollo-avocado.webp" width="960" height="533" alt="Ilustración del rollo Avocado, cubierto de láminas de aguacate" fetchpriority="high" decoding="async">
+          <a class="promo-sticker" href="https://tosushi.com.mx/promociones.html" target="_blank" rel="noopener noreferrer" aria-label="Miércoles 2×1 en rollos generales. Consultar promoción de referencia">
+            <span>Miércoles</span><strong>2×1</strong><small>Rollos generales</small>
+          </a>
           <figcaption class="dish-tag"><span class="dish-index">01</span><span>Rollo Avocado <small>Imagen ilustrativa</small></span></figcaption>
         </figure>
         <button class="motion-toggle" type="button" id="motion-toggle" aria-pressed="false">Movimiento <span id="motion-state">pausado</span></button>
@@ -79,10 +90,11 @@
       </div>
     </section>
 
-    <section class="menu-section" id="carta" aria-labelledby="menu-title">
+    <section class="menu-section" id="menu" aria-labelledby="menu-title">
+      <span id="carta" class="menu-anchor" aria-hidden="true"></span>
       <div class="wrap">
         <div class="menu-intro">
-          <div><p class="eyebrow"><span></span> Selección Cumbres</p><h2 id="menu-title">La carta.</h2></div>
+          <div><p class="eyebrow"><span></span> Selección Cumbres</p><h2 id="menu-title">Menú.</h2></div>
           <p>Busca un platillo, elige tus opciones y revisa el total. Precios de muestra en MXN.</p>
         </div>
         <div class="menu-controls">
@@ -91,19 +103,34 @@
             <span class="sr-only">Buscar platillo</span>
             <input type="search" id="menu-search" placeholder="Buscar platillo…" autocomplete="off">
           </label>
-          <div id="categories" class="categories" role="group" aria-label="Categorías de la carta"></div>
+          <div id="categories" class="categories" role="group" aria-label="Categorías del menú"></div>
         </div>
         <p class="result-count" id="result-count" role="status"></p>
         <div class="menu-grid" id="menu-grid"></div>
-        <noscript><p>Activa JavaScript para explorar la carta interactiva.</p></noscript>
+        <noscript><p>Activa JavaScript para explorar el menú interactivo.</p></noscript>
       </div>
     </section>
 
     <section class="visit" id="ubicacion" aria-labelledby="visit-title">
       <div class="wrap visit-inner">
-        <div class="visit-copy"><p class="eyebrow"><span></span> Monterrey, Nuevo León</p><h2 id="visit-title">Nos vemos<br>en Cumbres.</h2><address>Av. Paseo de los Leones 1205<br>Cumbres 1.er Sector, Monterrey, N.L.</address>
-          <a class="button primary" href="https://goo.gl/maps/pW7z4rBNHED6wKno7" target="_blank" rel="noopener noreferrer">Cómo llegar <span aria-hidden="true">↗</span></a></div>
-        <div class="visit-art" aria-hidden="true"><div class="visit-orbit"></div><span class="visit-seal"><svg viewBox="0 0 24 24"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></span><span class="visit-letters">MTY</span><span class="visit-caption">TO SUSHI / CUMBRES</span></div>
+        <div class="visit-copy">
+          <p class="eyebrow"><span></span> Monterrey, Nuevo León</p><h2 id="visit-title">Nos vemos<br>por aquí.</h2>
+          <div class="branch-options" id="branch-options" role="group" aria-label="Elige sucursal">
+            <button type="button" data-branch="cumbres" aria-pressed="true">Cumbres</button>
+            <button type="button" data-branch="valle" aria-pressed="false">Valle</button>
+            <button type="button" data-branch="puerta" aria-pressed="false">Puerta de Hierro</button>
+          </div>
+          <div class="branch-details" aria-live="polite">
+            <h3 id="branch-name">Cumbres</h3>
+            <address id="branch-address">Av. Paseo de los Leones 1205<br>Cumbres 1.er Sector, Monterrey, N.L.</address>
+            <p id="branch-note" class="branch-note" hidden>Dirección de referencia, pendiente de confirmar con la sucursal.</p>
+          </div>
+          <a class="button primary" id="branch-directions" href="https://goo.gl/maps/pW7z4rBNHED6wKno7" target="_blank" rel="noopener noreferrer"><span id="branch-link-label">Cómo llegar</span> <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="visit-map" id="visit-map">
+          <div class="visit-art" id="visit-art" aria-hidden="true"><div class="visit-orbit"></div><span class="visit-seal"><svg viewBox="0 0 24 24"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2.5"/></svg></span><span class="visit-letters">MTY</span><span class="visit-caption">TO SUSHI / MONTERREY</span></div>
+          <iframe id="branch-map" title="Mapa de Cumbres" referrerpolicy="no-referrer" allowfullscreen hidden></iframe>
+        </div>
       </div>
     </section>
   </main>

@@ -66,8 +66,13 @@ main { scroll-margin-top: var(--header-offset); }
 .hero-stamp { position: absolute; right: 6%; top: 3%; color: var(--lime); border: 1px solid #d1f36b75; border-radius: 100%; width: 66px; aspect-ratio: 1; display: grid; place-items: center; font-size: 1.35rem; transform: rotate(10deg); }
 .hero-food { position: relative; width: 100%; height: auto; object-fit: contain; transform: rotate(-6deg); }
 .spark { color: var(--lime); position: absolute; z-index: 1; line-height: 1; }
-.spark-one { top: 13%; left: 10%; font-size: 2.65rem; }
+.spark-one { top: 36%; left: 4%; font-size: 2.65rem; }
 .spark-two { right: 6%; bottom: 28%; font-size: 1.8rem; }
+.promo-sticker { position: absolute; top: 4%; left: 8%; z-index: 1; display: grid; justify-items: center; padding: 11px 15px; color: #241b0c; background: #ffc75f; border: 2px solid #241b0c; border-radius: 16px; box-shadow: 3px 4px #241b0c; transform: rotate(-9deg); text-align: center; }
+.promo-sticker span { font: 800 .72rem/1.1 ui-monospace, monospace; letter-spacing: .07em; text-transform: uppercase; }
+.promo-sticker strong { font: 900 3rem/.96 var(--display); letter-spacing: -.025em; margin-block: 3px; }
+.promo-sticker small { font-size: .73rem; font-weight: 800; white-space: nowrap; }
+.promo-sticker:hover { background: #ffdb8c; }
 .dish-tag { position: absolute; bottom: 3%; right: 2%; display: flex; align-items: center; gap: 10px; padding: 9px 13px 9px 9px; border-radius: 60px; color: var(--ink); background: var(--paper); transform: rotate(-4deg); font-size: .85rem; font-weight: 800; box-shadow: 0 10px 25px #0003; }
 .dish-tag small { display: block; margin-top: 1px; font-size: .67rem; color: var(--muted); font-weight: 600; }
 .dish-index { width: 30px; height: 30px; border-radius: 50%; background: var(--lime); display: grid; place-items: center; font: 800 .73rem ui-monospace, monospace; }
@@ -87,7 +92,8 @@ html[data-motion=on] .marquee.in-view .marquee-track { animation: ticker 29s lin
   html[data-motion=on] .hero.in-view .hero-food, html[data-motion=on] .hero.in-view .spark-one, html[data-motion=on] .marquee.in-view .marquee-track { animation: none; }
 }
 
-.featured-section, .menu-section, .visit { scroll-margin-top: calc(var(--header-offset) + 10px); }
+.featured-section, .menu-section, .menu-anchor, .visit { scroll-margin-top: calc(var(--header-offset) + 10px); }
+.menu-anchor { display: block; position: absolute; top: 0; }
 .featured-section { padding-block: 68px 54px; background: #eeefdf; border-bottom: 1px solid var(--line); }
 .featured-intro { margin-bottom: 22px; }
 .featured-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
@@ -102,7 +108,7 @@ html[data-motion=on] .marquee.in-view .marquee-track { animation: ticker 29s lin
 .feature-info p { margin: 0; color: var(--muted); font-size: .86rem; line-height: 1.4; }
 .feature-info .button { font-size: .8rem; white-space: nowrap; }
 .feature-info .button:hover { background: var(--lime); }
-.menu-section { padding-block: 74px 84px; }
+.menu-section { position: relative; padding-block: 74px 84px; }
 .menu-intro { display: flex; justify-content: space-between; align-items: end; gap: 30px; border-bottom: 1px solid var(--line); padding-bottom: 23px; margin-bottom: 22px; }
 .menu-intro .eyebrow { color: #435530; }
 .menu-intro .eyebrow span { background: #6e942f; }
@@ -121,6 +127,13 @@ html[data-motion=on] .marquee.in-view .marquee-track { animation: ticker 29s lin
 .menu-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 13px; }
 .menu-card { min-width: 0; display: grid; grid-template-rows: 1fr auto; border: 1px solid var(--line); border-radius: 19px; padding: 18px; background: #fffdf5; }
 .menu-card.featured { background: #edf4d6; border-color: #c1d19c; }
+.menu-main { display: grid; align-content: start; gap: 13px; min-width: 0; }
+.menu-photo { position: relative; aspect-ratio: 1.65; overflow: hidden; border-radius: 12px; background: #e7ead8; }
+.menu-photo img { width: 100%; height: 100%; object-fit: cover; }
+.menu-photo[data-photo="gohan-especial"] img { object-position: center 36%; }
+.menu-photo[data-photo="tempura"] img { object-position: center top; transform: scale(1.27); transform-origin: center top; }
+.menu-photo[data-photo="avocado"] img { object-position: 35% center; }
+.menu-photo span { position: absolute; left: 6px; bottom: 6px; padding: 4px 6px; background: var(--paper); color: var(--ink); border-radius: 5px; font-size: .65rem; font-weight: 750; line-height: 1.15; }
 .card-label { margin: 0 0 10px; color: #52633b; font: 750 .7rem ui-monospace, monospace; text-transform: uppercase; letter-spacing: .06em; }
 .menu-card h3 { margin: 0 0 6px; font-size: 1.22rem; letter-spacing: -.025em; }
 .card-description { margin: 0; min-height: 2.9em; color: var(--muted); font-size: .86rem; line-height: 1.45; }
@@ -134,7 +147,17 @@ html[data-motion=on] .marquee.in-view .marquee-track { animation: ticker 29s lin
 .visit { color: var(--paper); background: var(--ink); border-top: 1px solid #3a4728; overflow: hidden; }
 .visit-inner { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr); min-height: 345px; gap: 30px; align-items: center; padding-block: 46px; }
 .visit h2 { font: 900 clamp(3.1rem, 7.4vw, 6.6rem)/.94 var(--display); letter-spacing: -.02em; text-transform: uppercase; margin: 0; }
-.visit address { margin: 19px 0 21px; color: #e0e2d2; font-style: normal; line-height: 1.55; }
+.branch-options { display: flex; flex-wrap: wrap; gap: 8px; margin-block: 20px 18px; }
+.branch-options button { min-height: 44px; padding: 7px 14px; border-radius: 100px; background: transparent; color: var(--paper); border: 1px solid #8d987a; font-size: .86rem; font-weight: 750; }
+.branch-options button[aria-pressed="true"] { color: var(--ink); border-color: var(--lime); background: var(--lime); }
+.visit :focus-visible { outline-color: var(--lime); }
+.branch-details { margin-bottom: 17px; }
+.branch-details h3 { margin: 0 0 4px; font-size: 1.15rem; }
+.visit address { margin: 0; color: #e0e2d2; font-style: normal; line-height: 1.55; }
+.branch-note { margin: 6px 0 0; color: #f0d694; font-size: .85rem; line-height: 1.45; }
+.visit-map { position: relative; min-height: 330px; overflow: hidden; border: 1px solid #596947; border-radius: 21px; background: #202717; }
+.visit-map iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: var(--paper); }
+.visit-map .visit-art { position: absolute; inset: 12px; }
 .visit-art { min-height: 265px; position: relative; isolation: isolate; display: grid; place-items: center; }
 .visit-orbit { position: absolute; width: min(98%, 360px); height: 100%; border-radius: 50%; transform: rotate(-12deg); border: 1px solid #657346; background: repeating-radial-gradient(ellipse, transparent 0 17px, #d1f36b28 18px 19px); z-index: -1; }
 .visit-seal { position: absolute; top: 3%; right: 11%; background: var(--lime); color: var(--ink); border-radius: 50%; width: 58px; height: 58px; display: grid; place-items: center; transform: rotate(12deg); }
@@ -239,8 +262,12 @@ textarea { display: block; border: 1px solid #a7ac94; border-radius: 11px; paddi
   .hero-food { width: 93%; max-height: 110%; }
   .hero-orbit { width: min(62%, 245px); }
   .hero-stamp { width: 43px; top: 0; right: 3%; font-size: 1rem; }
-  .spark-one { top: 20%; left: 4%; font-size: 1.7rem; }
+  .spark-one { top: 46%; left: 0; font-size: 1.7rem; }
   .spark-two { right: 4%; bottom: 35%; font-size: 1.45rem; }
+  .promo-sticker { top: 2%; left: 1%; padding: 7px 9px; border-radius: 12px; }
+  .promo-sticker span { font-size: .59rem; }
+  .promo-sticker strong { font-size: 2.25rem; }
+  .promo-sticker small { font-size: .61rem; }
   .dish-tag { bottom: 0; right: 1%; font-size: .72rem; padding: 6px 9px 6px 6px; gap: 6px; }
   .dish-index { width: 24px; height: 24px; font-size: .64rem; }
   .dish-tag small { font-size: .6rem; }
@@ -258,8 +285,14 @@ textarea { display: block; border: 1px solid #a7ac94; border-radius: 11px; paddi
   .menu-controls { display: grid; gap: 11px; }
   .category { font-size: .78rem; min-height: 39px; padding-inline: 10px; }
   .menu-grid { grid-template-columns: 1fr; }
+  .menu-main { grid-template-columns: clamp(83px, 24vw, 114px) minmax(0, 1fr); align-items: start; gap: 11px; }
+  .menu-photo { aspect-ratio: 1; }
+  .menu-photo[data-photo="tempura"] img { transform: scale(2.2); }
+  .menu-photo span { left: 4px; bottom: 4px; font-size: .58rem; }
   .card-description { min-height: 0; }
   .visit-inner { grid-template-columns: 1fr; gap: 11px; padding-block: 38px 24px; }
+  .visit-map { min-height: 265px; }
+  .branch-options button { padding-inline: 10px; font-size: .78rem; }
   .visit-art { min-height: 165px; }
   .visit-orbit { width: min(76%, 270px); }
   .visit-seal { width: 42px; height: 42px; right: 15%; }

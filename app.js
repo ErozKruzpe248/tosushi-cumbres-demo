@@ -1,14 +1,14 @@
 'use strict';
 
 const catalog = [
-  { id: 'avocado', name: 'Rollo Avocado', category: 'Rollos', price: 105, featured: true, description: 'Rollo cubierto de láminas de aguacate. La especialidad que inspira esta portada.' },
-  { id: 'tlc', name: 'Rollo TLC', category: 'Rollos', price: 91, description: 'Rollo de camarón y salmón con aguacate, masago, queso crema y pepino.' },
-  { id: 'nevado', name: 'Rollo Nevado', category: 'Rollos', price: 120, description: 'Rollo cubierto de queso crema, con pepino, aguacate y salsa de anguila.' },
-  { id: 'fresh', name: 'Fresh Roll', category: 'Rollos', price: 92, description: 'Camarón, pasta de Tampico, queso crema y pepino en hoja de lechuga.' },
-  { id: 'gohan', name: 'Gohan', category: 'Arroces', description: 'Arroz blanco cocido al vapor. Elige el tamaño de tu porción.', optionLabel: 'Tamaño', options: [{ label: 'Mediano', price: 43 }, { label: 'Grande', price: 50 }] },
-  { id: 'gohan-especial', name: 'Gohan Especial', category: 'Arroces', description: 'Arroz con pasta de cangrejo y furikake. Puede ser picante.', optionLabel: 'Tamaño', options: [{ label: 'Mediano', price: 62 }, { label: 'Grande', price: 76 }] },
-  { id: 'tempura', name: 'Camarones Tempura', category: 'Entradas', price: 141, description: 'Camarones grandes con verduras en tempura.' },
-  { id: 'sunomono', name: 'Sunomono', category: 'Entradas', description: 'Pepino en tiras, limón, vinagre y furikake, con la proteína de tu elección.', optionLabel: 'Proteína', options: ['Cangrejo', 'Pulpo', 'Camarón', 'Salmón', 'Atún'].map(label => ({ label, price: 129 })) },
+  { id: 'avocado', name: 'Rollo Avocado', category: 'Rollos', price: 105, featured: true, photoAlt: 'Rollo cubierto con láminas de aguacate', description: 'Rollo cubierto de láminas de aguacate. La especialidad que inspira esta portada.' },
+  { id: 'tlc', name: 'Rollo TLC', category: 'Rollos', price: 91, illustrative: true, photoAlt: 'Rollos de sushi cubiertos de salmón', description: 'Rollo de camarón y salmón con aguacate, masago, queso crema y pepino.' },
+  { id: 'nevado', name: 'Rollo Nevado', category: 'Rollos', price: 120, illustrative: true, photoAlt: 'Rollos de sushi con salsa y brotes verdes', description: 'Rollo cubierto de queso crema, con pepino, aguacate y salsa de anguila.' },
+  { id: 'fresh', name: 'Fresh Roll', category: 'Rollos', price: 92, illustrative: true, photoAlt: 'Sushi con verduras de hoja verde', description: 'Camarón, pasta de Tampico, queso crema y pepino en hoja de lechuga.' },
+  { id: 'gohan', name: 'Gohan', category: 'Arroces', photoAlt: 'Tazón de arroz blanco al vapor', description: 'Arroz blanco cocido al vapor. Elige el tamaño de tu porción.', optionLabel: 'Tamaño', options: [{ label: 'Mediano', price: 43 }, { label: 'Grande', price: 50 }] },
+  { id: 'gohan-especial', name: 'Gohan Especial', category: 'Arroces', photoAlt: 'Tazón de arroz con pasta de cangrejo y furikake', description: 'Arroz con pasta de cangrejo y furikake. Puede ser picante.', optionLabel: 'Tamaño', options: [{ label: 'Mediano', price: 62 }, { label: 'Grande', price: 76 }] },
+  { id: 'tempura', name: 'Camarones Tempura', category: 'Entradas', price: 141, photo: 'camarones-tempura', photoAlt: 'Camarones y verduras en tempura', description: 'Camarones grandes con verduras en tempura.' },
+  { id: 'sunomono', name: 'Sunomono', category: 'Entradas', photoAlt: 'Sunomono con pepino, mariscos y furikake', description: 'Pepino en tiras, limón, vinagre y furikake, con la proteína de tu elección.', optionLabel: 'Proteína', options: ['Cangrejo', 'Pulpo', 'Camarón', 'Salmón', 'Atún'].map(label => ({ label, price: 129 })) },
 ];
 const extras = [{ id: 'soya', label: 'Soya extra', price: 10 }, { id: 'anguila', label: 'Salsa de anguila extra', price: 15 }];
 const categories = ['Todo', 'Rollos', 'Arroces', 'Entradas'];
@@ -73,10 +73,11 @@ function renderMenu() {
     const prices = item.options?.map(option => option.price) ?? [item.price];
     const price = Math.min(...prices);
     return `<article class="menu-card${item.featured ? ' featured' : ''}">
-      <div><p class="card-label">${item.featured ? '✦ En portada' : item.category}</p><h3>${item.name}</h3><p class="card-description">${item.description}</p></div>
+      <div class="menu-main"><div class="menu-photo" data-photo="${item.id}"><img src="./assets/${item.photo ?? item.id}.webp" alt="${escapeHtml(item.photoAlt)}" loading="lazy" decoding="async">${item.illustrative ? '<span>Foto ilustrativa</span>' : ''}</div>
+      <div><p class="card-label">${item.featured ? '✦ En portada' : item.category}</p><h3>${item.name}</h3><p class="card-description">${item.description}</p></div></div>
       <div class="card-bottom"><p class="card-price">${prices.some(value => value > price) ? '<small>Desde</small> ' : ''}${mxn(price)}</p>
       <button type="button" class="button card-action" data-product="${item.id}" aria-label="Elegir ${item.name}">Elegir <span aria-hidden="true">+</span></button></div></article>`;
-  }).join('') || '<div class="empty-results"><p>No encontramos platillos con esa búsqueda.</p><button class="button outline" type="button" data-reset-search>Ver toda la carta</button></div>';
+  }).join('') || '<div class="empty-results"><p>No encontramos platillos con esa búsqueda.</p><button class="button outline" type="button" data-reset-search>Ver todo el menú</button></div>';
 }
 
 function renderProduct() {
@@ -128,7 +129,7 @@ function renderOrderLine(line, review = false) {
 
 function renderCart() {
   const lines = cart.map(line => renderOrderLine(line)).join('');
-  cartContent.innerHTML = `<div class="dialog-body">${lines || '<div class="cart-empty"><p>Tu pedido está vacío.</p><button class="button outline" type="button" data-action="browse">Explorar la carta</button></div>'}</div>
+  cartContent.innerHTML = `<div class="dialog-body">${lines || '<div class="cart-empty"><p>Tu pedido está vacío.</p><button class="button outline" type="button" data-action="browse">Explorar el menú</button></div>'}</div>
     <div class="cart-summary"><p class="cart-total"><span>Subtotal de muestra</span><span>${mxn(totalPrice())} MXN</span></p>
     <p class="cart-disclaimer">Demo con precios de muestra.</p><button type="button" class="button dark" data-action="simulate" ${cart.length ? '' : 'disabled'}>Simular pedido por WhatsApp <span aria-hidden="true">↗</span></button></div>`;
 }
@@ -230,7 +231,7 @@ cartDialog.addEventListener('click', event => {
   const { action, line: id } = button.dataset;
   if (action === 'browse') {
     cartDialog.close();
-    byId('carta').scrollIntoView();
+    byId('menu').scrollIntoView();
     search.focus({ preventScroll: true });
     return;
   }
@@ -281,6 +282,59 @@ if ('IntersectionObserver' in window) {
 motionToggle.addEventListener('click', () => { motionRequested = !motionRequested; updateMotion(); });
 motionPreference.addEventListener('change', updateMotion);
 requestAnimationFrame(() => setTimeout(updateMotion, 450));
+
+const branches = {
+  cumbres: {
+    name: 'Cumbres', street: 'Av. Paseo de los Leones 1205', area: 'Cumbres 1.er Sector, Monterrey, N.L.',
+    directions: 'https://goo.gl/maps/pW7z4rBNHED6wKno7',
+    map: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3595.2156833920158!2d-100.35628536194885!3d25.697281952995798!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x866296749c551ccf%3A0x882bd1a5bbda1116!2sTo-Sushi!5e0!3m2!1ses!2smx!4v1556915702677!5m2!1ses!2smx',
+  },
+  valle: {
+    name: 'Valle', street: 'Av. José Vasconcelos 465, local 1', area: 'Del Valle, San Pedro Garza García, N.L.', reference: true,
+    directions: 'https://www.google.com/maps/search/?api=1&query=Av.%20Jos%C3%A9%20Vasconcelos%20465%20local%201%2C%20San%20Pedro%20Garza%20Garc%C3%ADa',
+    map: 'https://maps.google.com/maps?q=Av%20Jos%C3%A9%20Vasconcelos%20465%20local%201%2C%20Del%20Valle%2C%2066256%20San%20Pedro%20Garza%20Garc%C3%ADa%2C%20N.L.%2C%20Mexico&z=15&output=embed',
+  },
+  puerta: {
+    name: 'Puerta de Hierro', street: 'Av. Alejandro de Rodas 1006', area: 'Cerradas de Cumbres, Monterrey, N.L.',
+    directions: 'https://goo.gl/maps/VhGqd29UqhLkqd247',
+    map: 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3593.9345106468672!2d-100.4056090855045!3d25.739679215794837!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x86629774fac2eec7%3A0x62cc40a6ad699108!2sTo+Sushi+Puerta!5e0!3m2!1ses!2smx!4v1563809936005!5m2!1ses!2smx',
+  },
+};
+const branchOptions = byId('branch-options');
+const branchMap = byId('branch-map');
+let activeBranch = 'cumbres';
+
+function showBranchMap() {
+  const branch = branches[activeBranch];
+  if (branchMap.getAttribute('src') === branch.map) return;
+  branchMap.title = `Mapa de ${branch.name}`;
+  branchMap.src = branch.map;
+  branchMap.hidden = false;
+  byId('visit-art').hidden = true;
+}
+
+branchOptions.addEventListener('click', event => {
+  const button = event.target.closest('[data-branch]');
+  if (!button) return;
+  activeBranch = button.dataset.branch;
+  const branch = branches[activeBranch];
+  for (const option of branchOptions.querySelectorAll('button')) option.setAttribute('aria-pressed', String(option === button));
+  byId('branch-name').textContent = branch.name;
+  byId('branch-address').replaceChildren(branch.street, document.createElement('br'), branch.area);
+  byId('branch-note').hidden = !branch.reference;
+  byId('branch-directions').href = branch.directions;
+  byId('branch-link-label').textContent = branch.reference ? 'Consultar en Maps' : 'Cómo llegar';
+  showBranchMap();
+});
+
+if ('IntersectionObserver' in window) {
+  const mapObserver = new IntersectionObserver(([entry]) => {
+    if (!entry.isIntersecting) return;
+    showBranchMap();
+    mapObserver.disconnect();
+  }, { threshold: .1 });
+  mapObserver.observe(byId('visit-map'));
+}
 
 renderMenu();
 document.querySelector('[data-count]').textContent = countItems();

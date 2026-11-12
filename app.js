@@ -1,34 +1,29 @@
 'use strict';
 
-const catalog = [
-  { id: 'avocado', name: 'Rollo Avocado', category: 'Rollos', price: 105, featured: true, photoAlt: 'Rollo cubierto con láminas de aguacate', description: 'Rollo cubierto de láminas de aguacate. La especialidad que inspira esta portada.' },
-  { id: 'tlc', name: 'Rollo TLC', category: 'Rollos', price: 91, illustrative: true, photoAlt: 'Rollos de sushi cubiertos de salmón', description: 'Rollo de camarón y salmón con aguacate, masago, queso crema y pepino.' },
-  { id: 'nevado', name: 'Rollo Nevado', category: 'Rollos', price: 120, illustrative: true, photoAlt: 'Rollos de sushi con salsa y brotes verdes', description: 'Rollo cubierto de queso crema, con pepino, aguacate y salsa de anguila.' },
-  { id: 'fresh', name: 'Fresh Roll', category: 'Rollos', price: 92, illustrative: true, photoAlt: 'Sushi con verduras de hoja verde', description: 'Camarón, pasta de Tampico, queso crema y pepino en hoja de lechuga.' },
-  { id: 'gohan', name: 'Gohan', category: 'Arroces', photoAlt: 'Tazón de arroz blanco al vapor', description: 'Arroz blanco cocido al vapor. Elige el tamaño de tu porción.', optionLabel: 'Tamaño', options: [{ label: 'Mediano', price: 43 }, { label: 'Grande', price: 50 }] },
-  { id: 'gohan-especial', name: 'Gohan Especial', category: 'Arroces', photoAlt: 'Tazón de arroz con pasta de cangrejo y furikake', description: 'Arroz con pasta de cangrejo y furikake. Puede ser picante.', optionLabel: 'Tamaño', options: [{ label: 'Mediano', price: 62 }, { label: 'Grande', price: 76 }] },
-  { id: 'tempura', name: 'Camarones Tempura', category: 'Entradas', price: 141, photo: 'camarones-tempura', photoAlt: 'Camarones y verduras en tempura', description: 'Camarones grandes con verduras en tempura.' },
-  { id: 'sunomono', name: 'Sunomono', category: 'Entradas', photoAlt: 'Sunomono con pepino, mariscos y furikake', description: 'Pepino en tiras, limón, vinagre y furikake, con la proteína de tu elección.', optionLabel: 'Proteína', options: ['Cangrejo', 'Pulpo', 'Camarón', 'Salmón', 'Atún'].map(label => ({ label, price: 129 })) },
-];
-const extras = [{ id: 'soya', label: 'Soya extra', price: 10 }, { id: 'anguila', label: 'Salsa de anguila extra', price: 15 }];
-const categories = ['Todo', 'Rollos', 'Arroces', 'Entradas'];
+const categories = ['Todo', ...menuCategories];
+const pageSize = 18;
 const storageKey = 'to-sushi-cumbres-demo-v1';
 const quantityLimit = 20;
 const byId = id => document.getElementById(id);
-const lookup = id => catalog.find(item => item.id === id);
+const products = new Map(catalog.map(item => [item.id, item]));
+const lookup = id => products.get(id);
 const money = new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', maximumFractionDigits: 0 });
 const mxn = value => money.format(value);
 const normalize = value => value.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '').trim();
 const escapeHtml = value => String(value).replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
-const selectedExtras = line => extras.filter(extra => line.extras.includes(extra.id));
+const selectedExtras = line => lookup(line.product).extras.filter(extra => line.extras.includes(extra.id));
+const selectedChoices = line => (lookup(line.product).groups ?? []).flatMap(group =>
+  (line.choices[group.id] ?? []).map(index => group.options[index]));
 const basePrice = (item, option = 0) => item.options ? item.options[option].price : item.price;
-const unitPrice = line => basePrice(lookup(line.product), line.option) + selectedExtras(line).reduce((sum, extra) => sum + extra.price, 0);
+const unitPrice = line => basePrice(lookup(line.product), line.option)
+  + [...selectedChoices(line), ...selectedExtras(line)].reduce((sum, option) => sum + option.price, 0);
 const countItems = () => cart.reduce((sum, line) => sum + line.quantity, 0);
 const totalPrice = () => cart.reduce((sum, line) => sum + unitPrice(line) * line.quantity, 0);
 
 const search = byId('menu-search');
 const grid = byId('menu-grid');
 const filters = byId('categories');
+const more = byId('menu-more');
 const productDialog = byId('product-dialog');
 const cartDialog = byId('cart-dialog');
 const productForm = byId('product-form');
@@ -38,6 +33,8 @@ const simulation = byId('simulation');
 const messagePreview = byId('message-preview');
 const itemNote = byId('item-note');
 let activeCategory = 'Todo';
+let visibleCount = 0;
+let matches = [];
 let cart = loadCart();
 let draft = null;
 let returnTo = null;
@@ -59,7 +56,15 @@ function loadCart() {
       const product = lookup(line.product);
       return product && Number.isInteger(line.option) && line.option >= 0 && line.option < (product.options?.length ?? 1)
         && Number.isInteger(line.quantity) && line.quantity >= 1 && line.quantity <= quantityLimit;
-    });
+    }).map(line => ({
+      ...line,
+      choices: Object.fromEntries((lookup(line.product).groups ?? []).map(group => {
+        const values = line.choices?.[group.id];
+        const valid = Array.isArray(values) ? [...new Set(values)].filter(index =>
+          Number.isInteger(index) && index >= 0 && index < group.options.length) : [];
+        return [group.id, valid.slice(0, group.max)];
+      })),
+    }));
   } catch {
     return [];
   }
@@ -70,25 +75,84 @@ function saveCart() {
   document.querySelector('[data-count]').textContent = countItems();
 }
 
-function renderMenu() {
-  const term = normalize(search.value);
-  const matches = catalog.filter(item => (activeCategory === 'Todo' || item.category === activeCategory)
-    && normalize([item.name, item.description, item.category, ...(item.options?.map(option => option.label) ?? [])].join(' ')).includes(term));
-  byId('result-count').textContent = `${matches.length} ${matches.length === 1 ? 'platillo' : 'platillos'}`;
-  for (const button of filters.querySelectorAll('button')) button.setAttribute('aria-pressed', String(button.dataset.category === activeCategory));
-  menuPhotoObserver?.disconnect();
+const searchableCatalog = catalog.map(item => ({
+  item,
+  text: normalize([item.name, item.description, item.category, ...(item.options ?? []).map(option => option.label),
+    ...(item.groups ?? []).flatMap(group => group.options.map(option => option.label))].join(' ')),
+}));
+
+function renderCards(items) {
   const photoSource = menuPhotoObserver ? 'data-src' : 'src';
-  grid.innerHTML = matches.map(item => {
+  return items.map(item => {
     const prices = item.options?.map(option => option.price) ?? [item.price];
     const price = Math.min(...prices);
+    const [photo, caption] = menuPhotos[item.id] ?? [item.id];
+    const name = escapeHtml(item.name);
     return `<article class="menu-card${item.featured ? ' featured' : ''}">
-      <div class="menu-main"><div class="menu-photo" data-photo="${item.id}"><img ${photoSource}="./assets/${item.photo ?? item.id}.webp" alt="${escapeHtml(item.photoAlt)}" loading="lazy" decoding="async">${item.illustrative ? '<span>Foto ilustrativa</span>' : ''}</div>
-      <div><p class="card-label">${item.featured ? '✦ En portada' : item.category}</p><h3>${item.name}</h3><p class="card-description">${item.description}</p></div></div>
+      <div class="menu-main"><div class="menu-photo" data-photo="${item.id}"><img ${photoSource}="./assets/${photo}.webp" alt="" loading="lazy" decoding="async">${caption ? `<span>${caption}</span>` : ''}</div>
+      <div><p class="card-label">${item.category}</p><h3>${name}</h3><p class="card-description">${escapeHtml(item.description)}</p></div></div>
       <div class="card-bottom"><p class="card-price">${prices.some(value => value > price) ? '<small>Desde</small> ' : ''}${mxn(price)}</p>
-      <button type="button" class="button card-action" data-product="${item.id}" aria-label="Elegir ${item.name}">Elegir <span aria-hidden="true">+</span></button></div></article>`;
-  }).join('') || '<div class="empty-results"><p>No encontramos platillos con esa búsqueda.</p><button class="button outline" type="button" data-reset-search>Ver todo el menú</button></div>';
+      <button type="button" class="button card-action" data-product="${item.id}" aria-label="Elegir ${name}">Elegir <span aria-hidden="true">+</span></button></div></article>`;
+  }).join('');
+}
+
+function showNextPage() {
+  const items = matches.slice(visibleCount, visibleCount + pageSize);
+  grid.insertAdjacentHTML('beforeend', renderCards(items));
   if (menuPhotoObserver) {
-    for (const photo of grid.querySelectorAll('img[data-src]')) menuPhotoObserver.observe(photo);
+    for (const item of items) menuPhotoObserver.observe(grid.querySelector(`[data-photo="${item.id}"] img`));
+  }
+  visibleCount += items.length;
+  more.hidden = visibleCount >= matches.length;
+  byId('result-count').textContent = visibleCount < matches.length
+    ? `${visibleCount} de ${matches.length} platillos`
+    : `${matches.length} ${matches.length === 1 ? 'platillo' : 'platillos'}`;
+}
+
+function renderMenu() {
+  const terms = normalize(search.value).split(/\s+/).filter(Boolean);
+  matches = searchableCatalog.filter(({ item, text }) => (activeCategory === 'Todo' || item.category === activeCategory)
+    && terms.every(term => text.includes(term))).map(({ item }) => item);
+  for (const button of filters.querySelectorAll('button')) button.setAttribute('aria-pressed', String(button.dataset.category === activeCategory));
+  menuPhotoObserver?.disconnect();
+  visibleCount = 0;
+  grid.innerHTML = matches.length ? '' : '<div class="empty-results"><p>No encontramos platillos con esa búsqueda.</p><button class="button outline" type="button" data-reset-search>Ver todo el menú</button></div>';
+  showNextPage();
+}
+
+function renderGroup(group, selected, base = false) {
+  const name = base ? 'option' : `choice-${group.id}`;
+  const priced = base ? group.options.some(option => option.price !== group.options[0].price) : true;
+  const optionText = option => `${escapeHtml(option.label)}${priced && option.price ? ` ${base ? '' : '+'}${mxn(option.price)}` : ''}`;
+  const empty = group.required ? 'Selecciona una opción' : 'Sin agregar';
+  if (group.max === 1 && group.options.length > 5) {
+    return `<fieldset><label class="option-label" for="${name}">${group.label}</label>
+      <select id="${name}" name="${name}" ${group.required ? 'required' : ''}>
+        <option value="" ${group.required ? 'disabled' : ''} ${selected.length ? '' : 'selected'}>${empty}</option>
+        ${group.options.map((option, index) => `<option value="${index}" ${selected.includes(index) ? 'selected' : ''}>${optionText(option)}</option>`).join('')}
+      </select></fieldset>`;
+  }
+  const multiple = group.max > 1;
+  const options = group.options.map((option, index) => `<label class="choice">
+    <input type="${multiple ? 'checkbox' : 'radio'}" name="${name}" value="${index}" ${selected.includes(index) ? 'checked' : ''}
+      ${!multiple && group.required ? 'required' : ''}><span>${optionText(option)}</span></label>`).join('');
+  if (multiple) {
+    return `<details class="choice-group" ${selected.length ? 'open' : ''}><summary>${group.label} <small data-choice-count="${group.id}"></small></summary>
+      <fieldset class="choices"><legend class="sr-only">${group.label}</legend>${options}</fieldset></details>`;
+  }
+  const none = group.required ? '' : `<label class="choice"><input type="radio" name="${name}" value="" ${selected.length ? '' : 'checked'}><span>${empty}</span></label>`;
+  return `<fieldset><legend>${group.label}</legend><div class="choices">${none}${options}</div></fieldset>`;
+}
+
+function updateChoiceLimits(product) {
+  for (const group of product.groups ?? []) {
+    if (group.max === 1) continue;
+    const values = draft.choices[group.id] ?? [];
+    const count = productOptions.querySelector(`[data-choice-count="${group.id}"]`);
+    count.textContent = `${values.length} de ${group.max}`;
+    for (const input of productOptions.querySelectorAll(`input[name="choice-${group.id}"]`)) {
+      input.disabled = !input.checked && values.length >= group.max;
+    }
   }
 }
 
@@ -96,11 +160,13 @@ function renderProduct() {
   const product = lookup(draft.product);
   byId('product-title').textContent = product.name;
   byId('product-description').textContent = product.description;
-  const options = product.options ? `<fieldset><legend>${product.optionLabel}</legend><div class="choices">${product.options.map((option, index) => `
-    <label class="choice"><input type="radio" name="option" value="${index}" ${index === draft.option ? 'checked' : ''}><span>${option.label}${product.optionLabel === 'Tamaño' ? ` <small>${mxn(option.price)}</small>` : ''}</span></label>`).join('')}</div></fieldset>` : '';
-  productOptions.innerHTML = options + `<fieldset><legend>Extras de muestra</legend><div class="choices">${extras.map(extra => `
-    <label class="choice"><input type="checkbox" name="extra" value="${extra.id}" ${draft.extras.includes(extra.id) ? 'checked' : ''}><span>${extra.label} <small>+${mxn(extra.price)}</small></span></label>`).join('')}</div></fieldset>`;
+  const options = product.options ? renderGroup({ label: product.optionLabel, max: 1, required: true, options: product.options }, [draft.option], true) : '';
+  const groups = (product.groups ?? []).map(group => renderGroup(group, draft.choices[group.id] ?? [])).join('');
+  const extras = product.extras.length ? `<fieldset><legend>Extras opcionales</legend><div class="choices">${product.extras.map(extra => `
+    <label class="choice"><input type="checkbox" name="extra" value="${extra.id}" ${draft.extras.includes(extra.id) ? 'checked' : ''}><span>${extra.label} <small>+${mxn(extra.price)}</small></span></label>`).join('')}</div></fieldset>` : '';
+  productOptions.innerHTML = options + groups + extras;
   itemNote.value = draft.note;
+  updateChoiceLimits(product);
   updateProductTotal();
 }
 
@@ -114,7 +180,7 @@ function updateProductTotal() {
 function openProduct(product, line) {
   returnTo = line ? (simulation.hidden ? 'cart' : 'review') : null;
   if (line) cartDialog.close();
-  draft = line ? { ...line, extras: [...line.extras] } : { product, option: 0, extras: [], quantity: 1, note: '' };
+  draft = line ? { ...line } : { product, option: 0, choices: {}, extras: [], quantity: 1, note: '' };
   renderProduct();
   productDialog.showModal();
   productDialog.querySelector('.dialog-body').scrollTop = 0;
@@ -122,7 +188,11 @@ function openProduct(product, line) {
 
 function detailsFor(line) {
   const product = lookup(line.product);
-  return [product.options?.[line.option].label, ...selectedExtras(line).map(extra => extra.label)].filter(Boolean);
+  const choices = (product.groups ?? []).flatMap(group => {
+    const options = (line.choices[group.id] ?? []).map(index => group.options[index].label);
+    return options.length ? [`${group.label}: ${options.join(', ')}`] : [];
+  });
+  return [product.options?.[line.option].label, ...choices, ...selectedExtras(line).map(extra => extra.label)].filter(Boolean);
 }
 
 function renderOrderLine(line, review = false) {
@@ -135,7 +205,7 @@ function renderOrderLine(line, review = false) {
     <button type="button" data-line="${id}" data-action="more" aria-label="Sumar ${name}" ${line.quantity === quantityLimit ? 'disabled' : ''}>+</button></div>
     ${edit}<button type="button" data-line="${id}" data-action="remove" class="text-button">Quitar<span class="sr-only"> ${name}</span></button>`;
   return `<article class="cart-item${review ? ' review-item' : ''}"><div class="cart-item-title"><h3>${review ? `${line.quantity} × ` : ''}${name}</h3><strong>${mxn(unitPrice(line) * line.quantity)}</strong></div>
-    ${details ? `<p class="item-meta">${details}</p>` : ''}${line.note ? `<p class="item-meta">Nota: ${escapeHtml(line.note)}</p>` : ''}
+    ${details ? `<p class="item-meta">${escapeHtml(details)}</p>` : ''}${line.note ? `<p class="item-meta">Nota: ${escapeHtml(line.note)}</p>` : ''}
     <div class="cart-item-actions">${actions}</div></article>`;
 }
 
@@ -192,6 +262,11 @@ filters.addEventListener('click', event => {
   renderMenu();
 });
 search.addEventListener('input', renderMenu);
+more.addEventListener('click', () => {
+  const firstNew = visibleCount;
+  showNextPage();
+  grid.children[firstNew]?.querySelector('button').focus();
+});
 byId('inicio').addEventListener('click', event => {
   const button = event.target.closest('button[data-product], button[data-reset-search]');
   if (button?.dataset.product) openProduct(button.dataset.product);
@@ -205,8 +280,13 @@ byId('inicio').addEventListener('click', event => {
 
 productOptions.addEventListener('change', () => {
   const values = new FormData(productForm);
+  const product = lookup(draft.product);
   draft.option = Number(values.get('option') ?? 0);
   draft.extras = values.getAll('extra');
+  draft.choices = Object.fromEntries((product.groups ?? []).map(group => [
+    group.id, values.getAll(`choice-${group.id}`).filter(Boolean).map(Number),
+  ]));
+  updateChoiceLimits(product);
   updateProductTotal();
 });
 productForm.addEventListener('click', event => {

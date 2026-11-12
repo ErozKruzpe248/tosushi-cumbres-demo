@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#191c15">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; frame-src https://www.google.com https://maps.google.com; base-uri 'none'; form-action 'none'">
   <link rel="icon" href="data:,">
-  <meta name="description" content="Demo de To Sushi en Monterrey. Explora el menú de muestra, la promoción del miércoles y las ubicaciones de Cumbres, Valle y Puerta de Hierro.">
+  <meta name="description" content="Demo de To Sushi en Monterrey. Explora el menú completo de referencia, arma tu rollo o poke y consulta las sucursales.">
   <link rel="canonical" href="https://erozkruzpe248.github.io/tosushi-cumbres-demo/">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="es_MX">
@@ -17,7 +17,7 @@
   <meta property="og:image" content="https://erozkruzpe248.github.io/tosushi-cumbres-demo/assets/rollo-avocado.webp">
   <meta property="og:image:alt" content="Rollo de sushi cubierto de aguacate">
   <title>To Sushi Cumbres | Menú, promoción y sucursales (demo)</title>
-  <link rel="stylesheet" href="./style.css?v=3">
+  <link rel="stylesheet" href="./style.css?v=4">
 </head>
 <body>
   <a class="skip" href="#menu">Saltar al menú</a>
@@ -58,7 +58,7 @@
           <a class="promo-sticker" href="https://tosushi.com.mx/promociones.html" target="_blank" rel="noopener noreferrer" aria-label="Miércoles 2×1 en rollos generales. Consultar promoción de referencia">
             <span>Miércoles</span><strong>2×1</strong><small>Rollos generales</small>
           </a>
-          <figcaption class="dish-tag"><span class="dish-index">01</span><span>Rollo Avocado <small>Imagen ilustrativa</small></span></figcaption>
+          <figcaption class="dish-tag"><span class="dish-index">01</span><span>Rollo Avocado Especial <small>Imagen ilustrativa</small></span></figcaption>
         </figure>
         <button class="motion-toggle" type="button" id="motion-toggle" aria-pressed="false">Movimiento <span id="motion-state">pausado</span></button>
       </div>
@@ -94,8 +94,8 @@
       <span id="carta" class="menu-anchor" aria-hidden="true"></span>
       <div class="wrap">
         <div class="menu-intro">
-          <div><p class="eyebrow"><span></span> Selección Cumbres</p><h2 id="menu-title">Menú.</h2></div>
-          <p>Busca un platillo, elige tus opciones y revisa el total. Precios de muestra en MXN.</p>
+          <div><p class="eyebrow"><span></span> To Sushi Cumbres</p><h2 id="menu-title">Menú.</h2></div>
+          <p>Busca un platillo por nombre o ingrediente y agrégalo a tu pedido. Precios de referencia en MXN.</p>
         </div>
         <div class="menu-controls">
           <label class="search">
@@ -107,6 +107,7 @@
         </div>
         <p class="result-count" id="result-count" role="status"></p>
         <div class="menu-grid" id="menu-grid"></div>
+        <button type="button" class="button outline menu-more" id="menu-more" hidden>Ver más platillos</button>
         <noscript><p>Activa JavaScript para explorar el menú interactivo.</p></noscript>
       </div>
     </section>
@@ -190,6 +191,8 @@
       </div>
     </div>
   </dialog>
-  <script src="./app.js?v=3" defer></script>
+  <script src="./menu.js?v=4" defer></script>
+  <script src="./menu-photos.js?v=4" defer></script>
+  <script src="./app.js?v=4" defer></script>
 </body>
 </html>
